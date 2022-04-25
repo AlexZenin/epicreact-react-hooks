@@ -4,14 +4,32 @@
 import * as React from 'react'
 import { useLocalStorageState } from '../utils'
 
-const LOCAL_STORAGE_KEY = 'tic-tac-toe'
-const EMPTY_STATE = Array(9).fill(null)
+const LOCAL_STORAGE_KEY = 'squares'
 
-function Board({ squares, setSquares }) {
+function Board() {
+  // 🐨 squares is the state for this component. Add useState for squares
+  const emptyState = Array(9).fill(null)
+
+  // const [squares, setSquares] = React.useState(() => {
+    // const storedBoard = window.localStorage.getItem(LOCAL_STORAGE_KEY)
+    // if (storedBoard) {
+      // return JSON.parse(storedBoard)
+    // }
+    // return emptyState
+  // })
+// 
+  // React.useEffect(() => {
+    // window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(squares))
+  // }, [squares])
+// 
+ 
+  // Extra credit 2 - useLocalStorageState
+  const [squares, setSquares] = useLocalStorageState(LOCAL_STORAGE_KEY, emptyState)
+
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
   const status = calculateStatus(winner, squares, nextValue)
-
+  
   function selectSquare(square) {
     if (winner || squares[square]) {
       return
@@ -20,7 +38,11 @@ function Board({ squares, setSquares }) {
     squaresCopy[square] = nextValue
     setSquares(squaresCopy)
   }
-  
+
+  function restart() {
+      setSquares(emptyState)
+  }
+
   function renderSquare(i) {
     return (
       <button className="square" onClick={() => selectSquare(i)}>
@@ -31,6 +53,7 @@ function Board({ squares, setSquares }) {
 
   return (
     <div>
+      {/* 🐨 put the status in the div below */}
       <div className="status">{status}</div>
       <div className="board-row">
         {renderSquare(0)}
@@ -47,49 +70,18 @@ function Board({ squares, setSquares }) {
         {renderSquare(7)}
         {renderSquare(8)}
       </div>
+      <button className="restart" onClick={restart}>
+        restart
+      </button>
     </div>
   )
 }
 
 function Game() {
-  const INITIAL_STATE = [EMPTY_STATE]
-  const [history, setHistory] = useLocalStorageState(`${LOCAL_STORAGE_KEY}:history`, INITIAL_STATE)
-  const [currentStep, setCurrentStep] = useLocalStorageState(`${LOCAL_STORAGE_KEY}:step`, 0)
-  const squares = history[currentStep]
-
-  function handleSetSquare(squareArray) {
-    setHistory(history => ([...history.slice(0, currentStep + 1), squareArray]))
-    setCurrentStep(currentStep => ++currentStep)
-  }
-
-  function restart() {
-      setHistory(INITIAL_STATE)
-      setCurrentStep(0)
-  }
-  
-  const moves = (history.map((_, key) => (
-    <li>
-      <button 
-        disabled={currentStep === key} 
-        onClick={() => setCurrentStep(key)}
-      >
-        {key === 0 ? 'Go to game start' : `Go to move #${key}`}
-        {' '}
-        {currentStep === key && '(current)'}
-      </button>
-    </li>
-  )))
-
   return (
     <div className="game">
       <div className="game-board">
-        <Board squares={squares} setSquares={handleSetSquare} />
-        <button className="restart" onClick={restart}>
-          restart
-        </button>
-      </div>
-      <div className="game-info">
-        <ol>{moves}</ol>
+        <Board />
       </div>
     </div>
   )
